@@ -151,7 +151,8 @@ public class ListenService extends Service {
                                 : results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                         String text = (m != null && !m.isEmpty() && m.get(0) != null) ? m.get(0) : "";
                         // иногда итог короче промежуточного результата: берём более полный
-                        if (lastPartial.length() > text.length() && lastPartial.startsWith(text)) text = lastPartial;
+                        // сравниваем по числу слов, без учёта регистра и знаков: итог часто обрезан («джарвис открой»)
+                        if (wordCount(lastPartial) > wordCount(text)) text = lastPartial;
                         lastPartial = "";
                         if (!text.isEmpty()) {
                             Callback c = callback;
@@ -201,6 +202,12 @@ public class ListenService extends Service {
             destroyRec();
             schedule(2000);
         }
+    }
+
+    private static int wordCount(String t) {
+        if (t == null) return 0;
+        String c = t.replaceAll("[^\\p{L}\\p{N}\\s]", " ").trim();
+        return c.isEmpty() ? 0 : c.split("\\s+").length;
     }
 
     private void stopRec() {
