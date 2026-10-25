@@ -390,9 +390,22 @@
     if (!voice || recMode === "tap") { execute(found && rest ? rest : t); return; }
     if (found) {
       beep();
-      if (rest) { awaitingUntil = 0; execute(rest); }
+      if (rest) { awaitingUntil = 0; execVoice(rest); }
       else { say(withAddr("Слушаю")); awaitingUntil = Date.now() + 8000; }
-    } else if (Date.now() < awaitingUntil) { awaitingUntil = 0; execute(t); }
+    } else if (Date.now() < awaitingUntil) { awaitingUntil = 0; execVoice(t); }
+  }
+  // Распознавание режет фразу на куски: «открой» ... «телеграм». Если пришёл голый глагол,
+  // молча ждём продолжение (микрофон не глушим голосом), и только потом переспрашиваем.
+  let argTimer = null;
+  function execVoice(cmd) {
+    const c = cmd.trim().toLowerCase().replace(/[.,!?]+$/g, "");
+    if (own(BARE, c)) {
+      argPrefix = c; mode = "arg"; setState();
+      clearTimeout(argTimer);
+      argTimer = setTimeout(() => { if (mode === "arg") say(BARE[c]); }, 3500);
+      return true;
+    }
+    return execute(cmd);
   }
 
   // ---------- диалоги ----------
@@ -401,6 +414,7 @@
     const words = new Set(t.split(/\s+/));
     if (["riddle", "guess", "rps"].includes(mode)) return funDialog(t);
     if (mode === "arg") {
+      clearTimeout(argTimer);
       const pre = argPrefix; mode = null; argPrefix = "";
       if (has(t, "отмена", "отмени", "не надо", "ничего")) { say("Хорошо"); return; }
       execute(pre + " " + t); return;
