@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030914">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Джарвис">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Джарвис</title>
+<style>
+:root{--bg:#030914;--panel:#071426;--field:#0c1f3a;--fg:#d9efff;--muted:#6f8fb3;--accent:#19c3ff;--accent2:#8b7dff;--sel:#14386b;--ok:#6ee7ff;--err:#ff6b6b;
+  --sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+body{display:flex;flex-direction:column;padding:var(--sat) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px))}
+header{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 4px 8px;border-bottom:2px solid var(--accent)}
+h1{margin:0;font-size:21px;letter-spacing:.14em;color:var(--accent);font-weight:600}
+.ver{font-size:11px;color:var(--err)}
+.clock{text-align:right;font-variant-numeric:tabular-nums}
+#clock{font:600 18px ui-monospace,Consolas,monospace}
+#date{font-size:12px;color:var(--muted)}
+.hero{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 6px;flex:none}
+#orb{display:block;max-width:100%}
+#status{font-weight:600;color:var(--accent);font-size:14px}
+#partial{min-height:18px;font-size:12px;color:var(--muted);text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panes{flex:1;min-height:0;display:flex;flex-direction:column}
+.pane{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.pane[hidden]{display:none}
+#chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;flex:none;scrollbar-width:none}
+#chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:var(--field);color:var(--fg);border:0;border-radius:18px;padding:8px 12px;font-size:13px}
+.chip:active,button:active{filter:brightness(1.4)}
+#log{flex:1;min-height:60px;overflow-y:auto;background:var(--panel);border-radius:10px;padding:8px 10px;font:13px/1.45 ui-monospace,Consolas,monospace}
+.ln{margin:0 0 4px}.ln .tm{color:var(--muted);margin-right:8px}
+.ln.user{color:var(--accent)}.ln.jarvis{color:var(--ok)}.ln.sys{color:var(--muted)}.ln.err{color:var(--err)}
+.ln a{color:var(--accent2)}
+.bar{display:flex;gap:8px;align-items:center;flex:none;padding-bottom:8px}
+input,select,button,textarea{font:inherit}
+input[type=text],input[type=time],input[type=password],select{background:var(--field);color:var(--fg);border:1px solid transparent;border-radius:10px;padding:10px 12px;min-width:0;width:100%}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:0}
+button{background:var(--field);color:var(--fg);border:0;border-radius:10px;padding:10px 14px}
+button.pri{background:var(--accent);color:#001018;font-weight:600}
+#mic{flex:none;width:56px;height:56px;border-radius:50%;font-size:24px;padding:0;background:var(--field);border:2px solid var(--accent)}
+#mic.on{background:var(--accent);color:#001018;box-shadow:0 0 18px var(--accent)}
+#send{flex:none}
+nav{display:flex;flex:none;background:var(--panel);margin:0 -12px;padding:0 max(12px,env(safe-area-inset-left,0px)) var(--sab) max(12px,env(safe-area-inset-right,0px))}
+.tab{flex:1;background:none;border-radius:0;color:var(--muted);padding:12px 4px 10px;font-size:13px;border-top:2px solid transparent}
+.tab.on{color:var(--accent);border-top-color:var(--accent)}
+.scroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
+.hint{color:var(--muted);font-size:13px}
+.empty{color:var(--muted);padding:14px 4px;font-size:14px}
+.day{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:8px 2px 2px}
+.item{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:10px;padding:8px 10px}
+.item .t{font:600 14px ui-monospace,Consolas,monospace;color:var(--accent);min-width:54px}
+.item .x{flex:1;min-width:0;overflow-wrap:anywhere}
+.ico{background:none;color:var(--muted);padding:6px 8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 90px}
+.row .narrow{flex:0 0 100px}
+label.sw{display:flex;align-items:center;gap:10px;padding:6px 0}
+label.sw input{width:22px;height:22px;accent-color:var(--accent)}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+legend{color:var(--accent);font-weight:600;padding:8px 0 4px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+@media (min-width:700px){body{max-width:560px;margin:0 auto}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>J.A.R.V.I.S</h1><div id="ver" class="ver">⚠ скрипт не запущен</div></div>
+  <div class="clock"><div id="clock">00:00:00</div><div id="date"></div></div>
+</header>
+<div class="hero">
+  <canvas id="orb" width="260" height="260" aria-hidden="true"></canvas>
+  <div id="status">Микрофон выключен</div>
+  <div id="partial"></div>
+</div>
+<div class="panes">
+  <section class="pane" id="pane-console">
+    <div id="chips"></div>
+    <div id="log" aria-live="polite"></div>
+    <div class="bar">
+      <button id="mic" aria-label="Говорить">🎤</button>
+      <input type="text" id="cmd" placeholder="Команда текстом…" autocomplete="off" enterkeyhint="send">
+      <button id="send" class="pri">➤</button>
+    </div>
+  </section>
+
+  <section class="pane" id="pane-sched" hidden>
+    <div class="scroll">
+      <div class="hint">Скажи: «Джарвис, моё расписание: в девять планёрка, в час обед». Он напомнит за 5 минут и вовремя. «В пять» без уточнения = 17:00, утром говори «в пять утра».</div>
+      <div id="sched-list"></div>
+      <div class="row">
+        <select id="s-day" aria-label="День"><option value="0">Сегодня</option><option value="1">Завтра</option><option value="2">Послезавтра</option></select>
+        <input type="time" id="s-time" value="09:00" class="narrow" aria-label="Время">
+      </div>
+      <div class="row"><input type="text" id="s-text" placeholder="Что запланировано"><button id="s-add" class="pri narrow">＋ Добавить</button></div>
+      <div class="row"><button id="s-clear">Очистить всё</button></div>
+      <div class="hint">Напоминания работают, пока приложение открыто или лежит в фоне. Если телефон его выгрузил, оно напомнит при следующем открытии.</div>
+    </div>
+  </section>
+
+  <section class="pane" id="pane-cmds" hidden>
+    <div class="scroll">
+      <div class="hint">Свои команды важнее встроенных. Или скажи «Джарвис, научись».</div>
+      <div id="cmd-list"></div>
+      <input type="text" id="c-phrase" placeholder="Фраза, например: включи музыку">
+      <select id="c-type" aria-label="Что сделать"><option value="url">Открыть сайт</option><option value="say">Ответить голосом</option><option value="chain">Команды через ;</option></select>
+      <input type="text" id="c-value" placeholder="Адрес, фраза или команды">
+      <button id="c-add" class="pri">＋ Добавить команду</button>
+    </div>
+  </section>
+
+  <section class="pane" id="pane-set" hidden>
+    <div class="scroll">
+      <button id="install" class="pri" hidden>Установить на экран телефона</button>
+      <div id="ios-hint" class="hint" hidden>iPhone: нажми «Поделиться» → «На экран Домой», чтобы установить.</div>
+      <fieldset><legend>Голос</legend>
+        <label class="sw"><input type="checkbox" id="set-always"> Всегда слушать (скажи «Джарвис…»)</label>
+        <div class="hint">Лучше работает на Android в Chrome при включённом экране. Иначе нажимай на микрофон.</div>
+        <label class="sw"><input type="checkbox" id="set-voice"> Озвучивать ответы</label>
+        <label for="set-rate" class="hint">Скорость речи</label>
+        <input type="range" id="set-rate" min="0.7" max="1.5" step="0.05">
+        <button id="test-voice">Проверить голос</button>
+      </fieldset>
+      <fieldset><legend>Поведение</legend>
+        <label class="sw"><input type="checkbox" id="set-greet"> Приветствие при открытии</label>
+        <label class="sw"><input type="checkbox" id="set-beep"> Звук при активации</label>
+        <label class="sw"><input type="checkbox" id="set-callconfirm"> Спрашивать «да» перед звонком</label>
+        <label for="set-addr" class="hint">Как обращаться</label><input type="text" id="set-addr">
+        <label for="set-wake" class="hint">Слова активации через запятую</label><input type="text" id="set-wake">
+        <label for="set-theme" class="hint">Тема</label><select id="set-theme"></select>
+      </fieldset>
+      <fieldset><legend>ИИ (необязательно)</legend>
+        <label class="sw"><input type="checkbox" id="ai-on"> Спрашивать ИИ, если команда незнакома</label>
+        <select id="ai-prov" aria-label="Какой ИИ"><option>Groq</option><option>Gemini</option><option>Claude</option><option>Grok</option></select>
+        <input type="password" id="ai-key" placeholder="API-ключ" autocomplete="off">
+        <div id="ai-hint" class="hint"></div>
+        <input type="text" id="ai-model" aria-label="Модель">
+        <div class="hint">Ключ хранится только в этом браузере на телефоне.</div>
+        <button id="ai-reset">Забыть разговор</button>
+      </fieldset>
+    </div>
+  </section>
+</div>
+<nav>
+  <button class="tab on" data-tab="console">Консоль</button>
+  <button class="tab" data-tab="sched">План</button>
+  <button class="tab" data-tab="cmds">Команды</button>
+  <button class="tab" data-tab="set">Настройки</button>
+</nav>
+<div id="errbox" hidden style="pointer-events:none;position:fixed;left:8px;right:8px;bottom:70px;z-index:99;background:#400;color:#fff;border-radius:10px;padding:8px 10px;font:12px/1.4 monospace;max-height:40vh;overflow:auto"></div>
+<script>
+window.addEventListener("error", function (e) {
+  var b = document.getElementById("errbox"); if (!b) return;
+  b.hidden = false;
+  b.textContent += "Ошибка: " + (e.message || e) + " (" + String(e.filename || "").split("/").pop() + ":" + e.lineno + ")\n";
+});
+window.addEventListener("unhandledrejection", function (e) {
+  var b = document.getElementById("errbox"); if (!b) return;
+  b.hidden = false; b.textContent += "Ошибка: " + (e.reason && e.reason.message || e.reason) + "\n";
+});
+</script>
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

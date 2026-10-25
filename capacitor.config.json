@@ -1,0 +1,8 @@
+{
+  "appId": "com.jarvis.assistant",
+  "appName": "Джарвис",
+  "webDir": "www",
+  "backgroundColor": "#030914",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false }
+}
